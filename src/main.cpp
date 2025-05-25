@@ -12,6 +12,13 @@
 #include <cstdlib>
 #include <cmath>
 #include <math.h>
+#include "Attribute_Request_Callback.h"
+#include "Shared_Attribute_Callback.h"
+#include "RPC_Callback.h"
+#include "RPC_Response.h"
+
+// #define THINGSBOARD_ENABLE_DEBUG 1
+
 // constexpr char WIFI_SSID[] = "ACLAB";
 // constexpr char WIFI_PASSWORD[] = "ACLAB2023";
 constexpr char WIFI_SSID[] = "NaNa";
@@ -43,6 +50,9 @@ MPU6050 mpu;
 Adafruit_BMP085 bmp;
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+WiFiClient wifiClient;
+Arduino_MQTT_Client mqttClient(wifiClient);
+ThingsBoard tb_led(mqttClient, MAX_MESSAGE_SIZE);
 
 // Biến lưu dữ liệu
 float tempDHT1, humDHT1;
@@ -90,6 +100,20 @@ ThingsBoard tb_mq2(mqttClient_mq2, MAX_MESSAGE_SIZE);
 ThingsBoard tb_bmp2(mqttClient_bmp2, MAX_MESSAGE_SIZE);
 ThingsBoard tb_mpu2(mqttClient_mpu2, MAX_MESSAGE_SIZE);
 
+volatile int ledMode = 0;
+volatile uint16_t blinkingInterval = 5000U;
+
+void onAttributesReceived(const JsonObjectConst &data) {
+    if (data.containsKey("ledMode")) {
+        ledMode = data["ledMode"];
+        Serial.printf("Updated LED mode: %d\n", ledMode);
+    }
+}
+
+void requestSharedAttributes() {
+    tb_led.Shared_Attributes_Request(Attribute_Request_Callback(onAttributesReceived));
+}
+
 void InitWiFi() {
     Serial.println("Connecting to WiFi...");
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -99,6 +123,43 @@ void InitWiFi() {
     }
     Serial.println("\nConnected to WiFi");
 }
+// Declare the function prototype before its usage
+RPC_Response setLedModeCallback(const RPC_Data &data) {
+  Serial.println("Received RPC call: setLedMode");
+  Serial.print("Raw data received: ");
+  Serial.println(data.as<String>());
+  if (data.containsKey("params") && data["params"].containsKey("ledMode")) {
+     ledMode = data["params"]["ledMode"];
+    Serial.printf("LED mode updated: %d\n", ledMode);
+
+    digitalWrite(LED_BUILTIN, ledMode ? HIGH : LOW);
+    return RPC_Response("LED mode updated", true);
+  }
+
+  Serial.println(" Error: No ledMode parameter found in RPC call.");
+  return RPC_Response("Error: No ledMode parameter", false);
+}
+void MQTT_Task(void *pvParameters) {
+    while (1) {
+        if (!tb_led.connected()) {
+            Serial.println("Connecting to ThingsBoard...");
+            if (!tb_led.connect(THINGSBOARD_SERVER, TOKEN_DHT_1, THINGSBOARD_PORT)) {
+                Serial.println("Failed to connect to ThingsBoard");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+                continue;
+            }
+            Serial.println("Connected to ThingsBoard!");
+            tb_led.RPC_Subscribe(RPC_Callback("setLedMode", setLedModeCallback));
+
+            // tb.RPC_Subscribe(RPC_Callback("processData", processDataCallback));
+            tb_led.Shared_Attributes_Subscribe(Shared_Attribute_Callback(onAttributesReceived));
+            requestSharedAttributes();
+        }
+        tb_led.loop();
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
+
 
 // Task kiểm tra WiFi và kết nối lại nếu mất
 void WiFi_Task(void *pvParameters) {
@@ -347,5 +408,7 @@ if (!mpu.testConnection()) Serial.println("MPU6050 not found!");
 
 void loop() {
     // Loop để giữ CPU không bị treo
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    // vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelete(NULL);
+
 }
