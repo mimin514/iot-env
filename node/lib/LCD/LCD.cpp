@@ -29,7 +29,7 @@ void LCDshowMPU(float a, float b)
     lcd.setCursor(0, 1);
     lcd.print("PITCH:");
     lcd.print((int)a);
-    lcd.print("   ROLL:");
+    lcd.print("ROLL:");
     lcd.print((int)b);
 }
 void LCDshowbmp_mq2(float a, float b)

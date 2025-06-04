@@ -19,6 +19,7 @@
 #define DHTPIN 17
 #define DHTTYPE DHT11
 #define LED_PIN 26
+#define FAN_PIN 14
 #define BUZZER_PIN 25
 #define MQ_PIN 39
 
@@ -78,5 +79,20 @@ typedef struct {
   MPU6050 mpu; // nếu cần
 } SensorData;
 extern TaskHandle_t TaskSendData;
+extern volatile bool warningActive;
 
 extern SensorData data;
+
+extern const int MAX_DHT;
+extern const int MAX_BMP;
+extern const int MAX_MQ;
+extern const int MAX_MPU;
+extern const int MAX_MPU_PITCH;
+extern const int MAX_MPU_ROLL;
+
+extern const int MIN_DHT;
+extern const int MIN_BMP;
+extern const int MIN_MQ;
+extern const int MIN_MPU;
+extern const int MIN_MPU_PITCH;
+extern const int MIN_MPU_ROLL;

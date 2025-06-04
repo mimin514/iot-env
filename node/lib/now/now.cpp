@@ -8,7 +8,7 @@ void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
     // Bảo vệ khi truy cập biến dùng chung
     if (xSemaphoreTake(ledMutex, portMAX_DELAY)) {
       ledMode = ctrl.ledMode;
-      digitalWrite(LED_PIN, ledMode ? HIGH : LOW); // Cập nhật LED ngay
+      digitalWrite(FAN_PIN, ledMode ? HIGH : LOW); // Cập nhật LED ngay
       Serial.printf("LED mode received and applied: %d\n", ledMode);
       xSemaphoreGive(ledMutex);
     }

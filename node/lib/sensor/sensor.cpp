@@ -11,11 +11,14 @@ void DHTTask(void)
 
   data.tempDHT1 = dht.readTemperature();
   data.humDHT1 = dht.readHumidity();
-  if (isnan(data.tempDHT1) || isnan(data.humDHT1)) {
-  Serial.println("Failed to read from DHT sensor!");
-} else {
-  Serial.printf("DHT1: Temp: %.2f, Hum: %.2f\n", data.tempDHT1, data.humDHT1);
-}
+  if (isnan(data.tempDHT1) || isnan(data.humDHT1))
+  {
+    Serial.println("Failed to read from DHT sensor!");
+  }
+  else
+  {
+    Serial.printf("DHT1: Temp: %.2f, Hum: %.2f\n", data.tempDHT1, data.humDHT1);
+  }
   Serial.printf("DHT2: Temp=%.2f C, Humidity=%.2f%%\n", data.tempDHT2, data.humDHT2);
 }
 // Task mô phỏng đọc dữ liệu BMP180
@@ -101,22 +104,22 @@ void MPUTask(void)
   Serial.printf("MPU1: Pitch=%.2f, Roll=%.2f\n", data.Pitch1, data.Roll1);
   Serial.printf("MPU2: Pitch=%.2f, Roll=%.2f\n", data.Pitch2, data.Roll2);
 }
-void LEDTask(void* pvParameters) {
-    pinMode(LED_PIN, OUTPUT);
-    pinMode(BUZZER_PIN, OUTPUT);
-    for (;;) {
-        digitalWrite(LED_PIN, HIGH);
-        digitalWrite(BUZZER_PIN, HIGH);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        digitalWrite(LED_PIN, LOW);
-        digitalWrite(BUZZER_PIN, LOW);
-        vTaskDelay(pdMS_TO_TICKS(9000));
-    }
+void LEDTask(void *pvParameters)
+{
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(FAN_PIN, OUTPUT);
+  for (;;)
+  {
+    digitalWrite(LED_PIN, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    digitalWrite(LED_PIN, LOW);
+    vTaskDelay(pdMS_TO_TICKS(9000));
+  }
 }
 void sendTask(void *pvParameters)
 {
   data.id = 1; // Node ID
-
 
   while (1)
   {
@@ -125,7 +128,7 @@ void sendTask(void *pvParameters)
     BMP180Task();
     MQ135Task();
     MPUTask();
-
+limit_task();
     if (xSemaphoreTake(ledMutex, pdMS_TO_TICKS(10)))
     {
       data.ledMode = ledMode;
@@ -138,11 +141,56 @@ void sendTask(void *pvParameters)
   }
 }
 
-void lcd_task(void){
+void lcd_task(void)
+{
   LCDshowDHT(data.tempDHT1, data.humDHT1);
   vTaskDelay(pdMS_TO_TICKS(5000));
   LCDshowMPU(data.Pitch1, data.Roll1);
   vTaskDelay(pdMS_TO_TICKS(5000));
   LCDshowbmp_mq2(data.tempBMP1, data.air_quality_value1);
   vTaskDelay(pdMS_TO_TICKS(5000));
+}
+void onWarning(void)
+{
+  digitalWrite(FAN_PIN, HIGH);
+  digitalWrite(BUZZER_PIN, HIGH);
+}
+void offWarning(void)
+{
+  digitalWrite(FAN_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW);
+}
+void limit_task(void)
+{
+  if (data.tempDHT1 > MAX_DHT || data.humDHT1 < MIN_DHT ||
+      data.tempDHT2 > MAX_DHT || data.humDHT2 < MIN_DHT)
+  {
+    onWarning();
+    Serial.println("Warning: Temperature or Humidity out of range!");
+  }
+  else if (data.tempBMP1 > MAX_BMP || data.pressureBMP1 < MIN_BMP ||
+           data.tempBMP2 > MAX_BMP || data.pressureBMP2 < MIN_BMP)
+  {
+    onWarning();
+    Serial.println("Warning: Temperature or Humidity out of range!");
+  }
+  else if (data.air_quality_value1 > MAX_MQ || data.air_quality_value1 < MIN_MQ ||
+           data.air_quality_value2 > MAX_MQ || data.air_quality_value2 < MIN_MQ)
+  {
+    onWarning();
+    Serial.println("Warning: Air quality out of range!");
+  }
+  else if (data.Pitch1 > MAX_MPU_PITCH || data.Pitch1 < MIN_MPU_PITCH ||
+           data.Roll1 > MAX_MPU_ROLL || data.Roll1 < MIN_MPU_ROLL ||
+           data.Pitch2 > MAX_MPU_PITCH || data.Pitch2 < MIN_MPU_PITCH ||
+           data.Roll2 > MAX_MPU_ROLL || data.Roll2 < MIN_MPU_ROLL )
+  {
+    onWarning();
+    Serial.println("Warning: MPU values out of range!");
+  }
+
+  else
+  {
+    offWarning();
+  }
 }

@@ -7,12 +7,12 @@
 void setup()
 {
   Serial.begin(115200);
-    dht.begin();
+  dht.begin();
   bmp.begin();
   mpu.initialize();
   wifiInit();
   espnowInit();
-lcd_init();
+  lcd_init();
   xTaskCreatePinnedToCore(sendTask, "SendTask", 8192, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(LEDTask, "LEDTask", 8192, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(LCDTask, "LCDTask", 8192, NULL, 1, NULL, 1);
@@ -20,5 +20,4 @@ lcd_init();
 
 void loop()
 {
-
 }

@@ -29,5 +29,19 @@ int ax2 = 0, ay2 = 0, az2 = 0, gx2 = 0, gy2 = 0, gz2 = 0;
 int sensorValue = 0;
 float voltage = 0.0;
 
+volatile bool warningActive = false;
 
 SensorData data;
+
+ const int MAX_DHT=10;
+ const int MAX_BMP=10;
+ const int MAX_MQ=10;
+ const int MAX_MPU_PITCH=10;
+const int MAX_MPU_ROLL=10;
+
+ const int MIN_DHT=0;
+ const int MIN_BMP=0;
+ const int MIN_MQ=0;
+ const int MIN_MPU=0;
+ const int MIN_MPU_PITCH=0;
+    const int MIN_MPU_ROLL=0;

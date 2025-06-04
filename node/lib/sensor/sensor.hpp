@@ -6,5 +6,6 @@ void DHTTask(void);
 void sendTask(void *pvParameters);
 void LEDTask(void* pvParameters) ;
 void lcd_task(void);
+void limit_task(void);
 
 #endif
