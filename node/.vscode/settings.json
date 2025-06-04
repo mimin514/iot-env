@@ -1,0 +1,9 @@
+{
+    "idf.portWin": "COM5",
+    "idf.openOcdConfigs": [
+        "board/esp32s3-bridge.cfg"
+    ],
+    "C_Cpp.errorSquiggles": "disabled",
+    "cmake.sourceDirectory": "D:/BKU/Year 3/242/IOT/BTL/choioi/choioi1/espnow/node/lib/ArduinoJson/src",
+    "C_Cpp.default.compilerPath": "C:/Users/User/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe"
+}
