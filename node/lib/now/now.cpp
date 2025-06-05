@@ -1,15 +1,22 @@
 #include "now.hpp"
 #include "global.hpp"
 void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
+    Serial.print("Raw data received: ");
+  for (int i = 0; i < len; i++) {
+    Serial.printf("%02X ", incomingData[i]);
+  }
+  Serial.println();
   if (len == sizeof(ControlData)) {
     ControlData ctrl;
     memcpy(&ctrl, incomingData, sizeof(ctrl));
 
     // Bảo vệ khi truy cập biến dùng chung
     if (xSemaphoreTake(ledMutex, portMAX_DELAY)) {
-      ledMode = ctrl.ledMode;
-      digitalWrite(FAN_PIN, ledMode ? HIGH : LOW); // Cập nhật LED ngay
-      Serial.printf("LED mode received and applied: %d\n", ledMode);
+      if (ledMode != ctrl.ledMode) { // Chỉ cập nhật khi có thay đổi
+        ledMode = ctrl.ledMode;
+        // digitalWrite(FAN_PIN, ledMode ? HIGH : LOW); // Cập nhật LED ngay
+        Serial.printf("LED mode received and applied: %d\n", ledMode);
+      }
       xSemaphoreGive(ledMutex);
     }
   }

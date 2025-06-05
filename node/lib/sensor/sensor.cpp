@@ -111,6 +111,10 @@ void LEDTask(void *pvParameters)
   pinMode(FAN_PIN, OUTPUT);
   for (;;)
   {
+    if (xSemaphoreTake(ledMutex, pdMS_TO_TICKS(10))) {
+      digitalWrite(FAN_PIN, ledMode ? HIGH : LOW);
+      xSemaphoreGive(ledMutex);
+    }
     digitalWrite(LED_PIN, HIGH);
     vTaskDelay(pdMS_TO_TICKS(1000));
     digitalWrite(LED_PIN, LOW);
@@ -123,7 +127,7 @@ void sendTask(void *pvParameters)
 
   while (1)
   {
-
+Serial.println("Led Mode: " + String(ledMode));
     DHTTask();
     BMP180Task();
     MQ135Task();
@@ -152,12 +156,10 @@ void lcd_task(void)
 }
 void onWarning(void)
 {
-  digitalWrite(FAN_PIN, HIGH);
   digitalWrite(BUZZER_PIN, HIGH);
 }
 void offWarning(void)
 {
-  digitalWrite(FAN_PIN, LOW);
   digitalWrite(BUZZER_PIN, LOW);
 }
 void limit_task(void)

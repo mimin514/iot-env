@@ -19,7 +19,7 @@
 #define DHTPIN 17
 #define DHTTYPE DHT11
 #define LED_PIN 26
-#define FAN_PIN 14
+#define FAN_PIN 12
 #define BUZZER_PIN 25
 #define MQ_PIN 39
 
@@ -57,8 +57,10 @@ extern uint8_t masterAddress[] ;
 extern volatile uint8_t ledMode ;
 extern SemaphoreHandle_t ledMutex;
 
-typedef struct {
+ typedef struct {
   uint8_t ledMode;
+    uint8_t fanControl;
+  uint8_t fanState;    
 } ControlData;
 
 typedef struct {
