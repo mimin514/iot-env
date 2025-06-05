@@ -2,25 +2,26 @@
 #include "mqtt.hpp"
 #include "rpc.hpp"
 void mqttTask(void *pvParameters) {
+  static bool subscribed = false;
   while (1) {
     if (!tb_led.connected()) {
       Serial.println("[TB] Attempting to connect...");
       if (tb_led.connect(mqtt_server, TOKEN_DHT_1, THINGSBOARD_PORT)) {
         Serial.println("[TB] Connected to ThingsBoard");
-
-        tb_led.RPC_Subscribe(RPC_Callback("setLedMode", setLedModeCallback));
-        tb_led.Shared_Attributes_Subscribe(Shared_Attribute_Callback(onAttributesReceived));
-        tb_led.Shared_Attributes_Request(Attribute_Request_Callback(onAttributesReceived));
+        // if (!subscribed) {
+          tb_led.RPC_Subscribe(RPC_Callback("setLedMode", setLedModeCallback));
+          tb_led.Shared_Attributes_Subscribe(Shared_Attribute_Callback(onAttributesReceived));
+          tb_led.Shared_Attributes_Request(Attribute_Request_Callback(onAttributesReceived));
+          subscribed = true;
+        // }
       } else {
         Serial.println("[TB] Failed to connect to ThingsBoard");
       }
     }
-
     tb_led.loop();
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
-
 void sendMQTT(void *pvParameters) {
     for (;;) {
         if (!tb_dht1.connected()) tb_dht1.connect(THINGSBOARD_SERVER, TOKEN_DHT_1, THINGSBOARD_PORT);

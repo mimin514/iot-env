@@ -14,7 +14,7 @@ void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
     if (xSemaphoreTake(ledMutex, portMAX_DELAY)) {
       if (ledMode != ctrl.ledMode) { // Chỉ cập nhật khi có thay đổi
         ledMode = ctrl.ledMode;
-        // digitalWrite(FAN_PIN, ledMode ? HIGH : LOW); // Cập nhật LED ngay
+        digitalWrite(FAN_PIN, ledMode ? HIGH : LOW); // Cập nhật LED ngay
         Serial.printf("LED mode received and applied: %d\n", ledMode);
       }
       xSemaphoreGive(ledMutex);
