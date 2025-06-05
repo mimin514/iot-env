@@ -62,3 +62,4 @@ ThingsBoard tb_led(mqttClient, MAX_MESSAGE_SIZE); // LED control object
 volatile int ledMode = 0;
 
 FanSchedule fanSchedule;
+SemaphoreHandle_t ledMutex;

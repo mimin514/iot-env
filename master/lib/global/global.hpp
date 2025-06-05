@@ -12,6 +12,7 @@
 #define LED_BUILTIN 26
 #define BUZZER_PIN 4
 
+
 extern TaskHandle_t TaskMQTT;
 extern QueueHandle_t dataQueue;
 
@@ -100,3 +101,5 @@ typedef struct {
 
 extern FanSchedule fanSchedule;
 
+
+extern SemaphoreHandle_t ledMutex;

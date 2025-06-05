@@ -98,3 +98,5 @@ extern const int MIN_MQ;
 extern const int MIN_MPU;
 extern const int MIN_MPU_PITCH;
 extern const int MIN_MPU_ROLL;
+extern bool ota_update_requested ;
+extern String fw_url;
